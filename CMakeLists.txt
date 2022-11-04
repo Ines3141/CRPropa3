@@ -417,6 +417,7 @@ add_library(crpropa SHARED
   src/module/TextOutput.cpp
   src/module/Tools.cpp
   src/magneticField/ArchimedeanSpiralField.cpp
+  src/magneticField/MagneticBottle.cpp
   src/magneticField/JF12Field.cpp
   src/magneticField/JF12FieldSolenoidal.cpp
   src/magneticField/MagneticField.cpp
