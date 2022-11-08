@@ -57,6 +57,7 @@
 
 #include "crpropa/magneticField/AMRMagneticField.h"
 #include "crpropa/magneticField/ArchimedeanSpiralField.h"
+#include "crpropa/magneticField/MagneticBottle.h"
 #include "crpropa/magneticField/JF12Field.h"
 #include "crpropa/magneticField/JF12FieldSolenoidal.h"
 #include "crpropa/magneticField/MagneticField.h"
