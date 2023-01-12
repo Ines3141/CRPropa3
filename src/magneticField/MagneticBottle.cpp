@@ -3,21 +3,19 @@
 
 namespace crpropa {
 
-	// was macht namespace crpropa???
 
-	MagneticBottle::MagneticBottle(double B_0, double D_0, double M_0) {
-		setB0(B_0);
+	MagneticBottle::MagneticBottle(double B_0, double D_0, Vector3d M_0) {
+		setB0(B_0); // Magnetfeldstaerke
 		setD0(D_0); // Distance between the Dipols
-		setM0(M_0); // Magnetic dipol
+		setM0(M_0); // Magnetic dipol moment
 	}
 
 	Vector3d MagneticBottle::getField(const Vector3d& pos) const {
 		// Der Klasse MagneticBottle wird die Funktion getField zugeordnet
 		// Als Parameter wird die Klasse Vector3d übergeben
-		// Pos ist wahscheinlich die Position des Observers
 
-		double pi = 3.141856; // Welche libary muss benutzt werden????
-		double m_u = 1.26 * pow (10,-6); // Magnetische Feldkonstante
+		double pi = 3.1415926536;
+		double m_u = pi * 4 * pow (10,-7); // Magnetische Feldkonstante
 		double factor = m_u / (4 * pi);
 
 		//Uni Oslo arbeitet mit kartesischen Koordinaten
@@ -25,38 +23,46 @@ namespace crpropa {
 		double y = pos.getY();
 		double z = pos.getZ();
 
-		Vector3d BA1(0., 0., D_0);
+		Vector3d BA1;
 		Vector3d BA2;
-		Vector3d BB1(0., 0., -D_0);
+		Vector3d BB1;
 		Vector3d BB2;
 		Vector3d B;
+
+		double magnetischesMoment_abs = pow((pow(M_0.getX(),2)+pow(M_0.getY(),2)+pow(M_0.getZ(),2)),0.5);
+		Vector3d richtung = Vector3d(M_0.getX()/magnetischesMoment_abs,M_0.getY()/magnetischesMoment_abs, M_0.getZ()/magnetischesMoment_abs);
+
+		//positionierung der dipole
+		Vector3d position = richtung * D_0;
 
 		//Erstellt 5 Instanzen der Klasse Vector3d
 		// Wenn keine Parameter angegeben werden sind, sollte ein Vector3d (0.,0.,0.) erzeugt werden
 		// BA erstellt den Dipol an der Stelle (0,0,D)
+		// MU = 1000[0,0,1]
 
-		double r_A = pow((pow(x,2) + pow(y,2) + pow((z - D_0),2)),0.5);			// Betrag von Position Observer und BA
-		BA1.x += 3 * x * (z - D_0) / pow(r_A,5);						// Zuordnung der x-Koordinate 
-		BA1.y += 3 * y * (z - D_0) / pow(r_A,5);						// Zuordnung der y-Koordinate
-		BA1.z += 3 * pow((z - D_0),2)  / pow(r_A,5);						// Zuordnung der z-Koordinate
+		double r_A = pow((pow((x - position.getX()),2) + pow((y - position.getY()),2) + pow((z - position.getZ()),2)),0.5);	// Betrag von Position Observer und BA
+		BA1.x += 3 * (x - position.getX()) * (M_0.getX() * (x - position.getX()) + M_0.getY() * (y - position.getY()) + M_0.getZ() * (z - position.getZ())) / pow(r_A,5);			// Zuordnung der x-Koordinate
+		BA1.y += 3 * (y - position.getY()) * (M_0.getX() * (x - position.getX()) + M_0.getY() * (y - position.getY()) + M_0.getZ() * (z - position.getZ())) / pow(r_A,5);			// Zuordnung der y-Koordinate
+		BA1.z += 3 * (z - position.getZ()) * (M_0.getX() * (x - position.getX()) + M_0.getY() * (y - position.getY()) + M_0.getZ() * (z - position.getZ())) / pow(r_A,5);		// Zuordnung der z-Koordinate
 
 
-		BA2.x += -M_0 / pow(r_A,3);
-		BA2.y += -M_0 / pow(r_A,3);
-		BA2.z += -M_0 / pow(r_A,3);
+		BA2.x += - M_0.getX() / pow(r_A,3);
+		BA2.y += - M_0.getY() / pow(r_A,3);
+		BA2.z += - M_0.getZ() / pow(r_A,3);
 
 		// Muss es BA.x += sein????? Ich glaube nicht
 
 		//Dipol B
-		double r_B = pow((pow(x,2) + pow(y,2) + pow((z + D_0),2)),0.5);
+		double r_B = pow((pow((x + position.getX()),2) + pow((y + position.getY()),2) + pow((z + position.getZ()),2)),0.5);
 
-		BB1.x += 3 * x * M_0 * (z - D_0) / pow(r_B,5);
-		BB1.y += 3 * y * M_0 * (z - D_0) / pow(r_B,5);
-		BB1.z += 3 * M_0 * pow((z - D_0),2) / pow(r_B,5);
+		BB1.x += 3 * (x + position.getX()) * (M_0.getX() * (x + position.getX()) + M_0.getY() * (y + position.getY()) + M_0.getZ() * (z + position.getZ())) / pow(r_B,5);
+		BB1.y += 3 * (y + position.getY()) * (M_0.getX() * (x + position.getX()) + M_0.getY() * (y + position.getY()) + M_0.getZ() * (z + position.getZ())) / pow(r_B,5);
+		BB1.z += 3 * (z + position.getZ()) * (M_0.getX() * (x + position.getX()) + M_0.getY() * (y + position.getY()) + M_0.getZ() * (z + position.getZ()))/ pow(r_B,5);
 
-		BB2.x += -M_0 / pow(r_A,3);
-		BB2.y += -M_0 / pow(r_A,3);
-		BB2.z += -M_0 / pow(r_A,3);
+
+		BB2.x += - M_0.getX() / pow(r_B,3);
+		BB2.y += - M_0.getY() / pow(r_B,3);
+		BB2.z += - M_0.getZ() / pow(r_B,3);
 
 		// add all B-Fields together
 		B.x = factor * (BA1.x + BA2.x + BB1.x + BB2.x);
@@ -79,7 +85,7 @@ namespace crpropa {
 		return;
 	}
 
-	void MagneticBottle::setM0(double M) {
+	void MagneticBottle::setM0(Vector3d M) {
 		M_0 = M;
 		return;
 	}
@@ -92,10 +98,8 @@ namespace crpropa {
 		return D_0;
 	}
 
-	double MagneticBottle::getM0() const {
+	Vector3d MagneticBottle::getM0() const {
 		return M_0;
 	}
-
-
 
 } //end namespace crpropa
